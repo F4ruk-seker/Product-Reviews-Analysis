@@ -1,3 +1,5 @@
+from collections import Counter
+
 import joblib
 import pandas as pd
 from typing import Iterator
@@ -28,9 +30,39 @@ def temizle(text):
 
     return text
 
+
 with open('comment.txt', 'r', encoding='utf-8') as cf:
     comments = [temizle(text) for text in cf.read().split('\n')]
 
 print(comments)
-for _ in analysis_comments(comments):
+analysed = list(analysis_comments(comments))
+
+for _ in analysed:
     print(_)
+
+# Olumsuz yorumları filtreleme
+def repiter(param: str, comments):
+    negative_comments = [c['comment'] for c in comments if c['result'] == param]
+
+    # Yorumların tekrar sayısını bulma
+    comment_counts = Counter(negative_comments)
+
+    # En çok ve en az tekrar eden yorumları bulma
+    most_common = comment_counts.most_common(3)  # En çok tekrar eden 3
+    least_common = comment_counts.most_common()[-3:]  # En az tekrar eden 3
+
+    # Sonuçları yazdırma
+    print(f"En Çok Tekrar Eden {param} Yorumlar:")
+    for comment, count in most_common:
+        print(f"- {comment} (Tekrar: {count})")
+
+    print(f"\nEn Az Tekrar Eden {param} Yorumlar:")
+    for comment, count in least_common:
+        print(f"- {comment} (Tekrar: {count})")
+
+    print('\n')
+
+
+repiter('Olumlu', analysed)
+repiter('Olumsuz', analysed)
+repiter('Tarafsız', analysed)
